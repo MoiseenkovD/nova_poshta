@@ -58,7 +58,7 @@ def button(update: Update, context: CallbackContext):
         for i, city in enumerate(cities):
             city_buttons.append(InlineKeyboardButton(str(city), callback_data=f'set_city:{payload[0]}:{i}'))
 
-        city_keyboard = InlineKeyboardMarkup(utils.chunks(city_buttons, 4))
+        city_keyboard = InlineKeyboardMarkup(utils.chunks(city_buttons, 3))
 
         query.edit_message_text(text=f"✅ Обрана область: {payload[0]}")
 
