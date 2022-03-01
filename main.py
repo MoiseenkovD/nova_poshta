@@ -97,11 +97,19 @@ def button(update: Update, context: CallbackContext):
 
         location_work_str = '\n'.join(location_work)
 
-        context.bot.send_message(
-            chat_id=update.callback_query.from_user.id,
-            text=f'{location_work_str}',
-            parse_mode=ParseMode.HTML
-        )
+        if len(location_work_str) > 4095:
+            for x in range(0, len(location_work_str), 4095):
+                context.bot.send_message(
+                    chat_id=update.callback_query.from_user.id,
+                    text=location_work_str[x:x + 4095],
+                    parse_mode=ParseMode.HTML
+                )
+        else:
+            context.bot.send_message(
+                chat_id=update.callback_query.from_user.id,
+                text=f'{location_work_str}',
+                parse_mode=ParseMode.HTML
+            )
 
 
 bot.start_polling()
