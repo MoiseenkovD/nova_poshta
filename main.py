@@ -1,41 +1,25 @@
-import pandas as pd
-
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
-from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler
+from telegram.ext import Updater, CallbackContext, CallbackQueryHandler
+
+from decorators import command
+from configs import configs
 
 import helpers
-import utils
 
-from dotenv import load_dotenv, dotenv_values
+bot = Updater(token=configs['TOKEN'], use_context=True)
 
-load_dotenv()
-config = dotenv_values('.env')
-
-bot = Updater(token=config['TOKEN'], use_context=True)
-
-
-def command(command_name):
-    def decorator(func):
-        handler = CommandHandler(command_name, func)
-        bot.dispatcher.add_handler(handler)
-        return func
-    return decorator
-
-
-np_df = pd.read_excel('data/np4.xlsx')
-
-regions = list(np_df.sort_values(by='Область')['Область'].unique())
-
-regions_buttons = []
-
-
-for region in regions:
-    regions_buttons.append(InlineKeyboardButton(str(region), callback_data=f'set_region:{region}'))
-
-
-@command('start')
+@command(bot, 'start')
 def start(update: Update, context: CallbackContext):
-    regions_keyboard = InlineKeyboardMarkup(utils.chunks(regions_buttons, 2))
+    np_df = helpers.get_schedule_df()
+
+    regions = list(np_df.sort_values(by='Область')['Область'].unique())
+
+    regions_buttons = []
+
+    for region in regions:
+        regions_buttons.append(InlineKeyboardButton(str(region), callback_data=f'set_region:{region}'))
+
+    regions_keyboard = InlineKeyboardMarkup(helpers.chunks(regions_buttons, 2))
 
     context.bot.send_message(
         chat_id=update.message.chat_id,
@@ -45,6 +29,8 @@ def start(update: Update, context: CallbackContext):
 
 
 def button(update: Update, context: CallbackContext):
+    np_df = helpers.get_schedule_df()
+
     query = update.callback_query
 
     query.answer()
@@ -58,7 +44,7 @@ def button(update: Update, context: CallbackContext):
         for i, city in enumerate(cities):
             city_buttons.append(InlineKeyboardButton(str(city), callback_data=f'set_city:{payload[0]}:{i}'))
 
-        city_keyboard = InlineKeyboardMarkup(utils.chunks(city_buttons, 3))
+        city_keyboard = InlineKeyboardMarkup(helpers.chunks(city_buttons, 3))
 
         query.edit_message_text(text=f"✅ Обрана область: {payload[0]}")
 
