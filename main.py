@@ -22,7 +22,7 @@ def command(command_name):
     return decorator
 
 
-np_df = pd.read_excel('data/np2.xlsx')
+np_df = pd.read_excel('data/np4.xlsx')
 
 regions = list(np_df.sort_values(by='Область')['Область'].unique())
 
